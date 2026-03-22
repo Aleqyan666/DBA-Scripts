@@ -1,13 +1,40 @@
+/* ============================================================
+   Configuration & Control Parameters
+   ------------------------------------------------------------
+   These variables define:
+   - Target database and file for shrink
+   - Execution behavior (batching & monitoring)
+   - Internal calculations for space management
+
+   Design Notes:
+   - If @database_name or @file_name is NULL, the script will
+     automatically select the most suitable candidate based
+     on maximum reclaimable free space.
+   ⚠️ WARNING:
+       - DBCC SHRINKFILE can cause index fragmentation.
+       - Should NOT be used as routine maintenance.
+       - Recommended only after:
+           * Large data deletion
+           * One-time space reclamation
+   ============================================================ */
 BEGIN  
+DECLARE @database_name SYSNAME = 'DBA_OPS'; -- Target database
+DECLARE @file_name VARCHAR(400) ='DBA_OPS'; -- Logical file name
+DECLARE @wait_check_interval TINYINT = 5;  -- Monitoring interval (seconds)
+DECLARE @number_of_batches TINYINT = 3; -- Number of shrink iterations
 
-DECLARE @database_name SYSNAME = 'DBA_OPS';
-DECLARE @file_name VARCHAR(400) ='DBA_OPS';
-DECLARE @wait_check_interval TINYINT = 5;
-DECLARE @number_of_batches TINYINT = 3;
+/* ============================================================
+   File Size & Shrink Calculation Variables
+   ------------------------------------------------------------
+   These variables are used internally to:
+   - Determine current file size and free space
+   - Calculate shrink targets
+   - Control batch-wise size reduction
+   ============================================================ */
 
-DECLARE @file_target_size_mb DECIMAL(9,2);
-DECLARE @file_current_size_mb DECIMAL(9,2);
-DECLARE @file_current_free_space_mb DECIMAL(9,2);
+DECLARE @file_target_size_mb DECIMAL(9,2); -- Final desired size
+DECLARE @file_current_size_mb DECIMAL(9,2); -- Current file size
+DECLARE @file_current_free_space_mb DECIMAL(9,2); -- Reclaimable free space
 DECLARE @batch_size DECIMAL(9,2);
 DECLARE @current_target DECIMAL(9,2);
 DECLARE @ServerName sysname;
