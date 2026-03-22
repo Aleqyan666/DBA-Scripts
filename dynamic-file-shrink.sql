@@ -178,13 +178,6 @@ SET @current_target = @file_current_size_mb - @batch_size;
 WHILE @current_target > @file_target_size_mb
 BEGIN
  PRINT @current_target
- --SET @dbcc_shrink_script =
- --      N'USE ' + QUOTENAME(@database_name) + N';
- --      DBCC SHRINKFILE (' 
- --        + QUOTENAME(@file_name) 
- --        + N', ' 
- --  + CAST(CEILING(@current_target) AS NVARCHAR(20))
- --        + N');';
  SET @shrink_pshell =
     'sqlcmd -S ' + QUOTENAME(@ServerName, '"') +
     ' -d ' + QUOTENAME(@database_name, '"') +
@@ -223,8 +216,6 @@ BEGIN
    EXEC sp_executesql @kill_script
             BREAK; -- exit monitoring loop
       END
-  --PRINT @wait_for_delay_script
-  --EXEC sp_executesql @wait_for_delay_script
     END
     -- Shrink finished (naturally or killed) ? move to next batch
     SET @current_target = @current_target - @batch_size;
