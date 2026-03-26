@@ -22,30 +22,30 @@ CREATE TABLE #OldBackupFiles (
  );
 
 INSERT INTO #OldBackupFiles (FileName, CreationTime)
- SELECT
+SELECT
   LEFT(Line, CHARINDEX('|', Line) - 1) AS FileName,
   CAST(SUBSTRING(Line, CHARINDEX('|', Line) + 1, 100) AS DATETIME) AS CreationTime
- FROM #PSOutput
- WHERE Line IS NOT NULL
+FROM #PSOutput
+WHERE Line IS NOT NULL
    AND CHARINDEX('|', Line) > 0;
 
- DECLARE file_cursor CURSOR FOR
- SELECT [FileName] FROM #OldBackupFiles;
+DECLARE file_cursor CURSOR FOR
+SELECT [FileName] FROM #OldBackupFiles;
 
- OPEN file_cursor;
+OPEN file_cursor;
 
- FETCH NEXT FROM file_cursor INTO @file_name
- WHILE @@FETCH_STATUS = 0
- BEGIN
+FETCH NEXT FROM file_cursor INTO @file_name
+WHILE @@FETCH_STATUS = 0
+BEGIN
   SET @CMD_DeleteFiles = 'powershell -Command "Remove-Item ''' + @file_name + '''' + '"'
   PRINT @CMD_DeleteFiles;
   EXEC xp_cmdshell @CMD_DeleteFiles;
   FETCH NEXT FROM file_cursor INTO @file_name
- END
+END
 
- CLOSE file_cursor;
- DEALLOCATE file_cursor;
+CLOSE file_cursor;
+DEALLOCATE file_cursor;
 
- DROP TABLE #OldBackupFiles;
- DROP TABLE #PSOutput;
+DROP TABLE #OldBackupFiles;
+DROP TABLE #PSOutput;
 COMMIT TRANSACTION
