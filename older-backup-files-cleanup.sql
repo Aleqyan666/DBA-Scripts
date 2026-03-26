@@ -1,3 +1,12 @@
+/*
+Purpose:
+Deletes .bak backup files older than 7 days from the specified directory.
+
+Parameters:
+@Path - Backup folder location
+Retention - 7 days (modifiable in script)
+*/
+
 BEGIN TRANSACTION
 DECLARE @file_name VARCHAR(750); 
 DECLARE @Path NVARCHAR(4000) = N'D:\MSSQL_DV2\BACKUP'; --backup folder location
