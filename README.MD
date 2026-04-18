@@ -9,4 +9,4 @@ The repository is currently in its early stages and will gradually include more 
 ## Author
 
 Hayk Alekyan
-Junior SQL Server DBA
+Junior Database Adminsitrator
