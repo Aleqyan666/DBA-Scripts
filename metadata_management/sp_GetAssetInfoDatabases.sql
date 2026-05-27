@@ -1,10 +1,19 @@
+USE [DBAMonitor]
+GO
+
+SET ANSI_NULLS ON
+GO
+
+SET QUOTED_IDENTIFIER ON
+GO
+
 CREATE OR ALTER PROCEDURE [dbo].[sp_GetAssetInfoDatabases]
 AS
 
 INSERT INTO [DBAMonitor].[dbo].[db_metadata]
 (
     [database_name],
- [create_date],
+    [create_date],
     [compatibility_level],
     [collation],
     [is_read_only],
