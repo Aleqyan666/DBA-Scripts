@@ -10,13 +10,16 @@ Retention - 7 days (modifiable in script)
 BEGIN TRANSACTION
 DECLARE @file_name VARCHAR(750); 
 DECLARE @Path NVARCHAR(4000) = N'D:\MSSQL_DV2\BACKUP'; --backup folder location
+DECLARE @retention_days INT = 7;
 DECLARE @CMD_GetFiles  NVARCHAR(4000);
 DECLARE @CMD_DeleteFiles  NVARCHAR(4000);
  
 SET @CMD_GetFiles = N'powershell -Command "Get-ChildItem -Path '''
          + @Path
          + N''' -Filter *.bak -Recurse | '
-         + N'Where-Object { $_.CreationTime -lt (Get-Date).AddDays(-7) } | '
+         + N'Where-Object { $_.CreationTime -lt (Get-Date).AddDays(-'
+         + CAST(@retention_days AS NVARCHAR(10))
+         + N') } | '
          + N'ForEach-Object { $_.FullName + ''|'' + $_.CreationTime }"';
  
 CREATE TABLE #PSOutput (
