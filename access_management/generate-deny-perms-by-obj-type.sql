@@ -1,3 +1,10 @@
+/*
+Purpose:
+    Generate DENY statements for user tables, views, procedures, and functions.
+
+Review:
+    The script prints DENY statements only. Uncomment EXEC after reviewing output.
+*/
 SELECT
     o.object_id,
     s.name AS schema_name,
@@ -15,8 +22,9 @@ WHERE
 ORDER BY 
     o.name
  
-DECLARE @LoginName SYSNAME = 'usr_dummy';
+DECLARE @LoginName SYSNAME = 'usr_dummy'; -- Target login/user for generated DENY statements.
 DECLARE @DenyScript NVARCHAR(MAX) = '';
+
 DECLARE DenyCursor CURSOR FOR
 SELECT
     CASE
@@ -57,7 +65,6 @@ WHILE @@FETCH_STATUS = 0
 BEGIN
  --EXEC (@DenyScript);
  PRINT @DenyScript
- --PRINT 'Done'
  FETCH NEXT FROM DenyCursor INTO @DenyScript;
 END
 
