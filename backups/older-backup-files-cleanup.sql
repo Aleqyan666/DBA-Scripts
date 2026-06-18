@@ -1,16 +1,15 @@
 /*
 Purpose:
-Deletes .bak backup files older than 7 days from the specified directory.
+Deletes .bak backup files older than the configured retention period.
 
-Parameters:
-@Path - Backup folder location
-Retention - 7 days (modifiable in script)
+Review @Path and @retention_days before running. This script uses xp_cmdshell
+and PowerShell Remove-Item, so test the generated file list first.
 */
 
 BEGIN TRANSACTION
 DECLARE @file_name VARCHAR(750); 
-DECLARE @Path NVARCHAR(4000) = N'D:\MSSQL_DV2\BACKUP'; --backup folder location
-DECLARE @retention_days INT = 7;
+DECLARE @Path NVARCHAR(4000) = N'D:\MSSQL_DV2\BACKUP'; -- Backup folder location.
+DECLARE @retention_days INT = 7; -- Delete .bak files older than this many days.
 DECLARE @CMD_GetFiles  NVARCHAR(4000);
 DECLARE @CMD_DeleteFiles  NVARCHAR(4000);
  
