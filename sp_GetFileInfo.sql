@@ -1,5 +1,31 @@
+USE DBAMonitor
+GO
+
+CREATE OR ALTER PROCEDURE [dbo].[sp_GetFileInfo] 
+(
+ @disk_name VARCHAR(100) = NULL, 
+ @file_type VARCHAR(10) = NULL 
+)
+AS
+
+
 DECLARE @current_name SYSNAME;
 DECLARE @sql NVARCHAR(MAX);
+
+SET @disk_name = NULLIF(TRIM(@disk_name), '');
+SET @file_type = LOWER(@file_type)
+
+IF @file_type = 'r'
+    SET @file_type = 'ROWS';
+ELSE IF @file_type = 'l'
+    SET @file_type = 'LOG';
+ELSE
+BEGIN
+    IF @file_type IS NOT NULL
+        PRINT 'Invalid FileType specified. Returning both ROWS and LOG files.';
+
+    SET @file_type = 'ROWS,LOG';
+END
 
 IF OBJECT_ID('tempdb..#database_files_info') IS NOT NULL
     DROP TABLE [#database_files_info];
@@ -73,22 +99,26 @@ CLOSE [db_names];
 DEALLOCATE [db_names];
 
 SELECT 
- [database_name], 
- [file_name], 
- [file_type], 
- [physical_name], 
- [total_size_mb], 
- [used_space_mb], 
- [free_space_mb], 
- [free_space_percent]
+    [database_name], 
+    [file_name], 
+    [file_type], 
+    [physical_name], 
+    [total_size_mb], 
+    [used_space_mb], 
+    [free_space_mb], 
+    [free_space_percent]
 FROM 
- [#database_files_info]
+    [#database_files_info]
 WHERE 
- [physical_name] like 'E%' AND --disk name
- [file_type] = 'ROWS' --for log files 'LOG'
+    (LEFT([physical_name], 1) IN
+    (SELECT TRIM(value)
+    FROM STRING_SPLIT(@disk_name, ',')) OR @disk_name IS NULL OR @disk_name = '')
+ AND 
+    [file_type] IN 
+    (SELECT TRIM(value)
+    FROM STRING_SPLIT(@file_type, ','))
 ORDER BY 
- [free_space_mb] DESC
- --[total_size_mb] DESC --, database_name, file_type, file_id;
+    [free_space_mb] DESC
 
 DROP TABLE [#database_files_info];
 GO
